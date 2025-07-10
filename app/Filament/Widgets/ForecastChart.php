@@ -30,6 +30,7 @@ class ForecastChart extends ChartWidget
         // parameters
         $itemId =   $this->filters['item_id'] ?? null;
         $filterYear = $this->filters['year'] ?? null;
+        $limit = $this->filters['limit'] ?? null;
 
         // Jika item_id kosong, langsung return data kosong supaya tidak tampil
         if (!$itemId) {
@@ -68,15 +69,20 @@ class ForecastChart extends ChartWidget
             $filtered = $actual;
         }
 
-        // Buat ulang label dari data yang sudah difilter
+        // Batasi jumlah data jika limit diatur
+        if ($limit) {
+            $filtered = array_slice($filtered, 0, (int)$limit);
+        }
+
+        // Buat ulang label
         $labels = array_map(fn($item) => $item['month'], $filtered);
-        // Tambahkan label bulan setelah terakhir (optional)
-        if (count($filtered) > 0) {
-            $lastFiltered = end($filtered); // ambil data terakhir
-            // Convert kembali ke tanggal
+        // Tambahkan label bulan setelah terakhir
+        if (count($filtered) > 0 && (!$limit || count($filtered) < (int)$limit)) {
+            $lastFiltered = end($filtered);
             $lastDate = \Carbon\Carbon::createFromFormat('F - Y', $lastFiltered['month'])->addMonth();
             $labels[] = $lastDate->translatedFormat('F - Y');
         }
+
 
         // Tambahkan dataset actual yang sudah difilter
         $datasets[] = [
@@ -85,6 +91,7 @@ class ForecastChart extends ChartWidget
             'backgroundColor' => '#36A2EB',
             'borderColor' => '#9BD0F5',
         ];
+
 
         // Hitung forecast berdasarkan semua data actual (unfiltered)
         foreach ($intervals as $interval) {
@@ -135,6 +142,11 @@ class ForecastChart extends ChartWidget
                 $resultForecast =  $adjustedResult;
             }
 
+            // Batasi forecast jika limit diberikan
+            if ($limit) {
+                $resultForecast = array_slice($resultForecast, 0, (int)$limit);
+            }
+
             $datasets[] = [
                 'label' => "Forecast {$interval} interval",
                 'data' => array_column($resultForecast, 'result'),
@@ -164,40 +176,4 @@ class ForecastChart extends ChartWidget
     {
         return 'bar';
     }
-
-    // protected function myData()
-    // {
-    //     $itemId = $this->filters['item_id'] ?? null;
-    //     $filterYear = $this->filters['year'] ?? null;
-
-    //     $allData = Sale::when($itemId, fn($query) => $query->where('item_id', $itemId))
-    //         ->select('item_id', 'year', 'month', 'total_sales')
-    //         ->orderBy('year')->orderBy('month')
-    //         ->get();
-
-    //     $intervals = [3, 4, 5];
-    //     $datasets = [];
-
-    //     foreach ($intervals as $interval) {
-    //         $movingAverage = new MovingAverage();
-    //         $movingAverage->setPeriod($interval);
-    //         $result = $movingAverage->getCalculatedFromArray($allData->pluck('total_sales')->toArray());
-    //         $result = array_map('round', $result);
-
-    //         $adjustedResult = [];
-    //         for ($i = $interval - 1; $i < count($result); $i++) {
-    //             $date = \Carbon\Carbon::createFromDate($allData[$i]->year, $allData[$i]->month, 1)->addMonth();
-    //             $adjustedResult[] = [
-    //                 'result' => $result[$i],
-    //                 'year' => $date->year,
-    //                 'month' => $date->month,
-    //             ];
-    //         }
-
-    //         $datasets[] = [
-    //             'label' => "Forecast {$interval} interval",
-    //             'data' => array_column($adjustedResult, 'result'),
-    //         ];
-    //     }
-    // }
 }

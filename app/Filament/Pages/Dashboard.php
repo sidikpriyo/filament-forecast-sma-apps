@@ -29,7 +29,7 @@ class Dashboard extends \Filament\Pages\Dashboard
                 \Filament\Forms\Components\Section::make('Filter')
                     ->columns([
                         'sm' => 3,
-                        'xl' => 6,
+                        'xl' => 12,
                         '2xl' => 12,
                     ])
                     ->schema([
@@ -41,8 +41,8 @@ class Dashboard extends \Filament\Pages\Dashboard
                             ->default(1)
                             ->columnSpan([
                                 'sm' => 3,
-                                'xl' => 3,
-                                '2xl' => 6,
+                                'xl' => 5,
+                                '2xl' => 5,
                             ]),
                         \Filament\Forms\Components\Select::make('year')
                             ->label('Year')
@@ -51,8 +51,19 @@ class Dashboard extends \Filament\Pages\Dashboard
                             ->placeholder('All years')
                             ->columnSpan([
                                 'sm' => 3,
-                                'xl' => 3,
-                                '2xl' => 6,
+                                'xl' => 5,
+                                '2xl' => 5,
+                            ]),
+                        \Filament\Forms\Components\Select::make('limit')
+                            ->label('Limit')
+                            ->options([
+                                6 => '6',
+                            ])
+                            ->placeholder('All Data')
+                            ->columnSpan([
+                                'sm' => 3,
+                                'xl' => 2,
+                                '2xl' => 2,
                             ]),
                     ])
             ]);
